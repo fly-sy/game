@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>document</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-size: 12px;
+            font-family: "微软雅黑";
+            background: url(images/bg.png);
+        }
+        ul,li {
+            list-style: none;
+        }
+        a {
+            text-decoration: none;
+        }
+        .clearfix {
+            zoom: 0;
+        }
+        .clearfix:after {
+            content: "";
+            display: block;
+            clear: both;
+            visibility: hidden;
+            height: 0;
+        }
+        .game {
+           width: 784px;
+           border: 1px solid #ddd;
+           margin: 50px auto;
+           position: relative;
+        }
+        .game ul li {
+            float: left;
+            border: 1px solid #ddd;
+            width: 110px;
+            height: 110px;
+            position: relative;
+        }
+        .game ul li.center {
+            width: 560px;
+            border: 0;
+        }
+        .game ul li img{
+            display: block;
+            width: 100%;
+        }
+        .game .game-center {
+            width: 558px;
+            height: 334px;
+            background: url(images/center.png);
+            position: absolute;
+            top: 112px;
+            left: 112px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .game-center .start{
+            width: 237px;
+            height: 79px;
+            background: url(images/start.png);
+            display: inline-block;
+            margin-top: 200px;
+            border: 0;
+            cursor: pointer;
+            outline: none;
+
+        }
+
+        .game ul li .target{
+            width: 114px;
+            height: 114px;
+            background: url(images/target.png);
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            z-index: 20;
+            display: none;
+        }
+        .prize {
+            width: 600px;
+            line-height: 50px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            margin-left: -300px;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game">
+        <ul id="gamelist" class="clearfix">
+            <li id="0"><img src="images/0.jpg" alt=""></li>
+            <li id="1"><img src="images/1.jpg" alt=""></li>
+            <li id="2"><img src="images/2.jpg" alt=""></li>
+            <li id="3"><img src="images/6.jpg" alt=""></li>
+            <li id="4"><img src="images/3.jpg" alt=""></li>
+            <li id="5"><img src="images/4.jpg" alt=""></li>
+            <li id="6"><img src="images/5.jpg" alt=""></li>
+            <li id="19"><img src="images/19.jpg" alt=""></li>
+            <li id="" class="center"></li>
+            <li id="7"><img src="images/7.jpg" alt=""></li>
+            <li id="18"><img src="images/18.jpg" alt=""></li>
+            <li id="" class="center"></li>
+            <li id="8"><img src="images/8.jpg" alt=""></li>
+            <li id="17"><img src="images/17.jpg" alt=""></li>
+            <li id="" class="center"></li>
+            <li id="9"><img src="images/9.jpg" alt=""></li>
+            <li id="16"><img src="images/16.jpg" alt=""></li>
+            <li id="15"><img src="images/15.jpg" alt=""></li>
+            <li id="14"><img src="images/14.jpg" alt=""></li>
+            <li id="13"><img src="images/13.jpg" alt=""></li>
+            <li id="12"><img src="images/12.jpg" alt=""></li>
+            <li id="11"><img src="images/11.jpg" alt=""></li>
+            <li id="10"><img src="images/10.jpg" alt=""></li>
+        </ul>
+        <div class="game-center">
+            <input type="button" class="start" id="start" onclick="startRun()" />
+        </div>
+    </div>
+    <div class="prize" id="prize">...</div>
+    <script src="js/jquery.js"></script>
+    <script>
+        //  创建一个 block元素 作为选中的图标
+        var target = '<div class="target"></div>';
+        //  初始化下标
+        var index = 0;
+        //  初始化定时器变量
+        var timer = null;
+        //  给所有的li 添加  图标
+        $('#gamelist li').not("#gamelist .center").append(target);
+        //  显示第一个 图标
+        $('#gamelist li .target').eq(0).show();
+
+        // 获取下一个元素的位置
+        function moveToNext(i){
+            // 获取指定的li
+            var oli = $("#"+i);
+            // console.log(oli);
+            // 隐藏所有的 选中效果
+            $('#gamelist li .target').hide();
+            // 给指定的li添加选择效果
+            oli.find('.target').show();
+        };
+        //  开始抽奖
+        function startRun(){
+            //  执行后禁用开始按钮
+            $('#start').attr('disabled','disabled');
+            timer = setInterval(function(){
+                var rand = getRand(1,50);
+                // 判断中奖
+                if(rand == 10){
+                    getShop("shop"+(index),function(value){
+                        //  把回调回来的数据放入  prize 中
+                        $("#prize").html("恭喜您抽中了 - "+"<font color='red'>"+value+"</font>");
+
+                    });
+                    clearInterval(timer);
+                    moveToNext(index);
+                    index = 0;
+                    //  中奖后清楚掉 禁用效果
+                    $('#start').removeAttr('disabled');
+                    return;
+                };
+                // 判断边界
+                if(index > 19){
+                    index = 0;
+                };
+                moveToNext(index);
+                index++;
+            },30);
+        };
+
+        // 获取随机返回  范围值   1 - 50
+        function getRand(start,end){
+            return Math.floor(Math.random()*(start - end + 1) + end);
+        };
+
+        //  key  value
+        function getShop(key,callback){
+            //  模拟后台数据
+            var data = {
+                "shop0":"谢谢参与",
+                "shop1":"安仔挂饰",
+                "shop2":"碳素羽毛球拍",
+                "shop3":"斗破乾坤黄金贵族礼包",
+                "shop4":"绝代双骄黄金特权礼包",
+                "shop5":"贵族礼包宝盒",
+                "shop6":"iPhone 5",
+                "shop7":"斗破乾坤媒体大礼包",
+                "shop8":"积分+10",
+                "shop9":"魔法礼包宝盒",
+                "shop10":"IPAD MINI",
+                "shop11":"街机三国旷世斗者礼包",
+                "shop12":"雷蛇鼠标",
+                "shop13":"遮天2乱世无双礼包",
+                "shop14":"大将军战将礼包",
+                "shop15":"积分+500",
+                "shop16":"雷蛇键盘",
+                "shop17":"360U盘",
+                "shop18":"神将三国一马当千礼包",
+                "shop19":"轩辕传888积分礼包",
+                "shop20":"谢谢参与"
+            };
+            //通过key值获取相应的value
+            var value = data[key];
+            if(callback) callback(value);
+        };
+    </script>
+</body>
+</html>
